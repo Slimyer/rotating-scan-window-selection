@@ -19,7 +19,7 @@ This repository accompanies our manuscript **"Pre-Imaging Control-Window Selecti
 
 ### Key Highlights
 - **Pre-Imaging Window-Planning Framework:** Formulates calibration control-data acquisition as a pre-imaging discrete subset selection problem over candidate strip windows using only nominal imaging geometry, compressing calibration downlink volume to a few thousandths of the full image (e.g., **0.15%** at $N = 24$).
-- **Image-Space Area Measure & Task-Benefit Selection (IA):** Derives an image-space area measure and area-weighted task matrix $Q_{\mathrm{A}}$ aligned with spatially uniform full-swath ground positioning accuracy, propagating focal-plane measurement uncertainty through local pixel-to-ground Jacobians to directly minimize expected full-swath ground MSE $\Phi(\mathcal{S}) = \operatorname{tr}(Q_{\mathrm{A}} F_{\mathcal{S}}^{-1})$.
+- **Image-Space Area Measure & Task-Benefit Selection (IA):** Derives an image-space area measure and area-weighted task matrix $Q_{\mathrm{A}}$ aligned with spatially uniform full-swath ground positioning accuracy, propagating focal-plane measurement uncertainty through local pixel-to-ground Jacobians to directly minimize expected full-swath ground MSE $\Phi(\mathcal{S}) = \mathrm{tr}(Q_{\mathrm{A}} F_{\mathcal{S}}^{-1})$.
 - **Noise-Scale Invariance & Error-Model Robustness:** Demonstrates both theoretically and experimentally that nominal imaging geometry captures the dominant cross-swath heteroscedasticity of ground observation errors without requiring complex empirical matching-noise priors.
 
 ---
