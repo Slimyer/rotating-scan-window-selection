@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Demo — Pre-Imaging Control-Window Selection for Rotating-Scan Satellites</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --primary: #dc2626;
+      --primary-soft: #fef2f2;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #16a34a;
+      --amber: #d97706;
+      --cyan: #0284c7;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 18px 20px 32px;
+    }
+
+    /* Header */
+    .hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-main { flex: 1 1 680px; }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid #fecaca;
+    }
+
+    .badge.blue {
+      background: var(--blue-soft);
+      color: var(--blue);
+      border-color: #bfdbfe;
+    }
+
+    .hero h1 {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+
+    .authors {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .hero-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 7px;
+      font-size: 12.5px;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text);
+      background: var(--surface-alt);
+      border: 1px solid var(--border-strong);
+      transition: all 0.15s ease;
+    }
+
+    .btn-link:hover {
+      background: #e2e8f0;
+    }
+
+    /* Mode Tabs */
+    .mode-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tabs {
+      display: inline-flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 4px;
+      box-shadow: var(--shadow);
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover { color: var(--text); background: var(--surface-alt); }
+
+    .tab-btn.active {
+      background: var(--text);
+      color: #ffffff;
+    }
+
+    /* Hover readout pill */
+    .hover-pill {
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow);
+      min-height: 33px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Control Deck */
+    .control-deck {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .control-row + .control-row {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .ctrl-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .ctrl-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-right: 2px;
+    }
+
+    .pill-btn {
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 5px 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .pill-btn:hover { background: var(--surface-alt); color: var(--text); }
+
+    .pill-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .pill-btn.active-blue {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+    }
+
+    .pill-btn.play-btn {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+      min-width: 82px;
+    }
+
+    .pill-btn.play-btn:hover { background: #1e293b; }
+
+    .slider-wrap {
+      flex: 1 1 260px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary);
+      cursor: pointer;
+      height: 6px;
+    }
+
+    .step-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: var(--surface-alt);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    /* Insight Banner + KPI Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 1024px) {
+      .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 9px 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .kpi-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .kpi-val {
+      font-size: 17px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .kpi-val.highlight { color: var(--primary); }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .insight-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 9px 14px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #78350f;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .alloc-chips {
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .alloc-chip {
+      font-size: 11.5px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #fcd34d;
+      color: #92400e;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Visualization Panels */
+    .panel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .panel-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .legend-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+
+    .leg-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      position: relative;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      cursor: crosshair;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr 1.0fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 1120px) {
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Loading Overlay */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(248, 250, 252, 0.94);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid #cbd5e1;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+
+    .footer {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div style="font-weight: 600; font-size: 14px; color: #0f172a;">
+      Loading nominal Strip I geometry &amp; 15,680 candidate Jacobians…
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Hero Header -->
+    <header class="hero">
+      <div class="hero-main">
+        <div class="badge-row">
+          <span class="badge">Interactive Demonstration</span>
+          <span class="badge blue">1960 × 8 = 15,680 Candidate Windows (Real-Time Exact Matrix Updates)</span>
+        </div>
+        <h1>Pre-Imaging Control-Window Selection for Downlink-Efficient On-Orbit Geometric Calibration of Rotating-Scan Satellites</h1>
+        <div class="authors">
+          Zhiming Deng<sup>1</sup>, Guang Huo<sup>2</sup>, and Cheng Wei<sup>1,*</sup> &nbsp;|&nbsp;
+          <sup>1</sup>Harbin Institute of Technology &nbsp;&bull;&nbsp;
+          <sup>2</sup>China Academy of Aerospace System and Innovation
+        </div>
+      </div>
+      <div class="hero-links">
+        <a class="btn-link" href="https://github.com/Slimyer/rotating-scan-window-selection" target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub Repository
+        </a>
+      </div>
+    </header>
+
+    <!-- Mode Tabs + Hover Readout -->
+    <div class="mode-bar">
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-mode="dynamic">1. Dynamic Step-by-Step Selection</button>
+        <button class="tab-btn" data-mode="explorer">2. Method &amp; Budget Explorer (N = 8..48)</button>
+        <button class="tab-btn" data-mode="sandbox">3. Interactive Sandbox (Click to Design)</button>
+      </div>
+      <div class="hover-pill" id="hover-readout">
+        Hover over any panel to inspect candidate window geometry, local GSD, and marginal gain Δ(s | S).
+      </div>
+    </div>
+
+    <!-- Mode 1 Controls: Dynamic Selection -->
+    <section class="control-deck" id="deck-dynamic">
+      <div class="control-row">
+        <div class="ctrl-group">
+          <span class="ctrl-label">Selection Criterion:</span>
+          <button class="pill-btn active" data-dyn-crit="I_A">IA — Task-Benefit (Ours)</button>
+          <button class="pill-btn" data-dyn-crit="D_opt">D-opt — Parameter Volume</button>
+          <button class="pill-btn" data-dyn-crit="A_opt">A-opt — Parameter Trace</button>
+        </div>
+        <div class="ctrl-group" style="margin-left: auto;">
+          <span class="ctrl-label">Heatmap &amp; Curve Lens:</span>
+          <button class="pill-btn active-blue" data-lens="own">Criterion's Own Δ(s | S)</button>
+          <button class="pill-btn" data-lens="ia">Full-Swath Task-Benefit Δ_IA(s | S)</button>
+        </div>
+      </div>
+      <div class="control-row">
+        <div class="ctrl-group">
+          <button class="pill-btn" id="btn-reset" title="Reset to Step 1">&#9198;</button>
+          <button class="pill-btn" id="btn-prev" title="Previous Step">&#9664; Prev</button>
+          <button class="pill-btn play-btn" id="btn-play">&#9654; Play</button>
+          <button class="pill-btn" id="btn-next" title="Next Step">Next &#9654;</button>
+          <button class="pill-btn" id="btn-end" title="Jump to Converged Layout">&#9197;</button>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="step-slider" min="0" max="37" value="4" />
+          <span class="step-badge" id="step-label">Step 5 / 24 (Rank-First Init)</span>
+        </div>
+        <div class="ctrl-group">
+          <span class="ctrl-label">Speed:</span>
+          <button class="pill-btn" data-speed="900">0.5×</button>
+          <button class="pill-btn active-blue" data-speed="480">1×</button>
+          <button class="pill-btn" data-speed="220">2×</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mode 2 Controls: Method & Budget Explorer -->
+    <section class="control-deck hidden" id="deck-explorer">
+      <div class="control-row">
+        <div class="ctrl-group">
+          <span class="ctrl-label">Planning Method:</span>
+          <button class="pill-btn active" data-exp-method="I_A">IA (Ours)</button>
+          <button class="pill-btn" data-exp-method="D_opt">D-opt</button>
+          <button class="pill-btn" data-exp-method="A_opt">A-opt</button>
+          <button class="pill-btn" data-exp-method="U_A">U-A (Uniform Ground Area)</button>
+          <button class="pill-btn" data-exp-method="U_phi">U-φ (Uniform Scan Angle)</button>
+        </div>
+        <div class="ctrl-group">
+          <span class="ctrl-label">Window Budget N:</span>
+          <button class="pill-btn" data-exp-n="8">8</button>
+          <button class="pill-btn" data-exp-n="16">16</button>
+          <button class="pill-btn active-blue" data-exp-n="24">24</button>
+          <button class="pill-btn" data-exp-n="32">32</button>
+          <button class="pill-btn" data-exp-n="40">40</button>
+          <button class="pill-btn" data-exp-n="48">48</button>
+        </div>
+        <div class="ctrl-group" style="margin-left: auto;">
+          <span class="ctrl-label">Benchmark Curve:</span>
+          <button class="pill-btn active-blue" data-bench="pred">Analytical √Φ(S)</button>
+          <button class="pill-btn" data-bench="mc">Monte Carlo (n=400)</button>
+          <button class="pill-btn" data-bench="in_strip">Rendered In-Strip</button>
+          <button class="pill-btn" data-bench="cross_strip">Rendered Cross-Strip</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mode 3 Controls: Interactive Sandbox -->
+    <section class="control-deck hidden" id="deck-sandbox">
+      <div class="control-row">
+        <div class="ctrl-group">
+          <span class="ctrl-label">Interactive Actions:</span>
+          <button class="pill-btn active" id="btn-sb-greedy">+1 Greedy IA Window</button>
+          <button class="pill-btn" id="btn-sb-swap">Run 1 Exchange Swap</button>
+          <button class="pill-btn" id="btn-sb-clear">Clear All</button>
+        </div>
+        <div class="ctrl-group" style="margin-left: auto;">
+          <span class="ctrl-label">Load N=24 Preset:</span>
+          <button class="pill-btn" data-sb-preset="I_A_N24">IA (24)</button>
+          <button class="pill-btn" data-sb-preset="D_opt_N24">D-opt (24)</button>
+          <button class="pill-btn" data-sb-preset="A_opt_N24">A-opt (24)</button>
+          <button class="pill-btn" data-sb-preset="U_A_N24">U-A (24)</button>
+          <button class="pill-btn" data-sb-preset="U_phi_N24">U-φ (24)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Selected Windows |S|</div>
+        <div class="kpi-val" id="kpi-n">5</div>
+        <div class="kpi-sub" id="kpi-downlink">0.032% of 15,680 strip windows</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Normal-Matrix Rank</div>
+        <div class="kpi-val" id="kpi-rank">9 / 9</div>
+        <div class="kpi-sub" id="kpi-rank-sub">Full 9-parameter observability</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Expected Full-Swath RMSE</div>
+        <div class="kpi-val highlight" id="kpi-rmse">0.2086 m</div>
+        <div class="kpi-sub">√Φ(S) = √tr(Q_A F_S⁻¹) at σ₀ = 0.1 px</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Scale-Free Layout Factor κ(S)</div>
+        <div class="kpi-val" id="kpi-kappa">2.086 m/px</div>
+        <div class="kpi-sub">Noise-scale invariant √Φ(S) / σ₀</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Log-Determinant ln det(F_S)</div>
+        <div class="kpi-val" id="kpi-logdet">91.28</div>
+        <div class="kpi-sub">D-optimality objective</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Parameter Trace tr(F_S⁻¹)</div>
+        <div class="kpi-val" id="kpi-trace">0.0842</div>
+        <div class="kpi-sub">A-optimality objective</div>
+      </div>
+    </div>
+
+    <!-- Physical Insight Banner -->
+    <div class="insight-box">
+      <div id="insight-text">
+        <strong>Physical Insight:</strong> Initializing full-rank 9-parameter geometry...
+      </div>
+      <div class="alloc-chips" id="alloc-chips"></div>
+    </div>
+
+    <!-- Panel A: Full-Width Candidate Detector-Window Grid -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <div class="panel-title" id="panel-a-title">
+          Panel A — Candidate Detector-Window Grid (1960 Columns × 8 Detector Layers = 15,680 Windows)
+        </div>
+        <div class="legend-inline">
+          <span class="leg-item"><span class="dot" style="background:#0f172a; border:1.5px solid #fff; box-shadow:0 0 0 1px #0f172a;"></span>Selected S</span>
+          <span class="leg-item"><span class="dot" style="background:#dc2626; border:1.5px solid #fde047;"></span>Added / Swapped</span>
+          <span class="leg-item"><span class="dot" style="background:#2563eb;"></span>Next Peak arg max Δ(s | S)</span>
+          <span class="leg-item" style="font-size:11.5px; color:#64748b;">Heatmap: Low <span style="display:inline-block;width:48px;height:8px;border-radius:3px;vertical-align:middle;background:linear-gradient(90deg,#ffffcc,#feb24c,#f03b20,#bd0026);"></span> High Δ</span>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="canvas-grid" height="195"></canvas>
+      </div>
+    </div>
+
+    <!-- Bottom 3 Synchronized Panels -->
+    <div class="bottom-grid">
+      <!-- Panel B: Scan-Angle Marginal Gain Profile -->
+      <div class="panel-card" style="margin-bottom:0;">
+        <div class="panel-header">
+          <div class="panel-title" id="panel-b-title">Panel B — Marginal Benefit Profile Across Scan Angle φ</div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="canvas-profile" height="255"></canvas>
+        </div>
+      </div>
+
+      <!-- Panel C: Curved Ground-Track Swath -->
+      <div class="panel-card" style="margin-bottom:0;">
+        <div class="panel-header">
+          <div class="panel-title">Panel C — Orbital Curved Ground-Swath Footprint (km)</div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="canvas-ground" height="255"></canvas>
+        </div>
+      </div>
+
+      <!-- Panel D: Convergence / Multi-Budget Benchmark -->
+      <div class="panel-card" style="margin-bottom:0;">
+        <div class="panel-header">
+          <div class="panel-title" id="panel-d-title">Panel D — Expected Full-Swath RMSE Decay</div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="canvas-chart" height="255"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      All candidate Jacobians and relative swath coordinates shown above are anonymized pre-imaging nominal quantities (no geographic coordinates or reference imagery). Real-time rank-2 matrix updates run locally in your browser.
+    </footer>
+  </div>
+
+  <script>
+  (() => {
+    "use strict";
+
+    // Global data buffers
+    let META = null;
+    let JW = null;      // Float32Array (15680 * 18)
+    let COORDS = null;  // Float32Array (15680 * 2)
+    let Q_FLAT = null;  // Float64Array (81)
+    let COL_BOUNDS = { crossMin: -1280, crossMax: 1280, alongMin: -125, alongMax: 125 };
+
+    // Offscreen 1960 x 8 heatmap canvas for crisp zero-lag blitting
+    const heatCanvas = document.createElement("canvas");
+    heatCanvas.width = 1960;
+    heatCanvas.height = 8;
+    const heatCtx = heatCanvas.getContext("2d");
+    const heatImg = heatCtx.createImageData(1960, 8);
+
+    // UI State
+    const state = {
+      mode: "dynamic",          // "dynamic" | "explorer" | "sandbox"
+      dynCrit: "I_A",           // "I_A" | "D_opt" | "A_opt"
+      lens: "own",              // "own" | "ia"
+      stepIdx: 4,               // start at Step 5 (just reached full rank 9!)
+      playing: false,
+      playTimer: null,
+      speedMs: 480,
+
+      expMethod: "I_A",
+      expN: 24,
+      benchType: "pred",        // "pred" | "mc" | "in_strip" | "cross_strip"
+
+      sandboxSel: [],
+      sandboxAdded: null,
+      sandboxRemoved: null,
+
+      hoverCand: null,          // candidate index 0..15679 under cursor
+      computed: null            // cached result for current state
+    };
+
+    // YlOrRd 256-entry RGB lookup table
+    const CMAP = new Uint8Array(256 * 3);
+    (function initColormap() {
+      const stops = [
+        [0.00, [255, 255, 204]],
+        [0.25, [254, 217, 118]],
+        [0.50, [254, 153, 41]],
+        [0.75, [227, 26, 28]],
+        [1.00, [145, 0, 38]]
+      ];
+      for (let i = 0; i < 256; i++) {
+        const t = i / 255;
+        let s0 = stops[0], s1 = stops[stops.length - 1];
+        for (let k = 0; k < stops.length - 1; k++) {
+          if (t >= stops[k][0] && t <= stops[k + 1][0]) {
+            s0 = stops[k]; s1 = stops[k + 1]; break;
+          }
+        }
+        const u = (t - s0[0]) / Math.max(1e-9, s1[0] - s0[0]);
+        CMAP[i * 3 + 0] = Math.round(s0[1][0] + u * (s1[1][0] - s0[1][0]));
+        CMAP[i * 3 + 1] = Math.round(s0[1][1] + u * (s1[1][1] - s0[1][1]));
+        CMAP[i * 3 + 2] = Math.round(s0[1][2] + u * (s1[1][2] - s0[1][2]));
+      }
+    })();
+
+    // =========================================================================
+    // Exact 9x9 Symmetric Jacobi Eigensolver & Real-Time Marginal Gain Engine
+    // =========================================================================
+    function jacobiEigen9(A_in) {
+      const A = new Float64Array(A_in);
+      const V = new Float64Array(81);
+      for (let i = 0; i < 9; i++) V[i * 9 + i] = 1.0;
+
+      for (let sweep = 0; sweep < 35; sweep++) {
+        let maxOff = 0.0;
+        for (let p = 0; p < 8; p++) {
+          for (let q = p + 1; q < 9; q++) {
+            const apq = Math.abs(A[p * 9 + q]);
+            if (apq > maxOff) maxOff = apq;
+          }
+        }
+        if (maxOff < 1e-14) break;
+
+        for (let p = 0; p < 8; p++) {
+          for (let q = p + 1; q < 9; q++) {
+            const apq = A[p * 9 + q];
+            if (Math.abs(apq) < 1e-15) continue;
+            const app = A[p * 9 + p];
+            const aqq = A[q * 9 + q];
+            const tau = (aqq - app) / (2.0 * apq);
+            const t = tau >= 0 ? 1.0 / (tau + Math.sqrt(1.0 + tau * tau))
+                               : -1.0 / (-tau + Math.sqrt(1.0 + tau * tau));
+            const c = 1.0 / Math.sqrt(1.0 + t * t);
+            const s = t * c;
+
+            A[p * 9 + p] = app - t * apq;
+            A[q * 9 + q] = aqq + t * apq;
+            A[p * 9 + q] = 0.0;
+            A[q * 9 + p] = 0.0;
+
+            for (let r = 0; r < 9; r++) {
+              if (r !== p && r !== q) {
+                const arp = A[r * 9 + p];
+                const arq = A[r * 9 + q];
+                A[r * 9 + p] = A[p * 9 + r] = c * arp - s * arq;
+                A[r * 9 + q] = A[q * 9 + r] = s * arp + c * arq;
+              }
+              const vrp = V[r * 9 + p];
+              const vrq = V[r * 9 + q];
+              V[r * 9 + p] = c * vrp - s * vrq;
+              V[r * 9 + q] = s * vrp + c * vrq;
+            }
+          }
+        }
+      }
+      const evals = new Float64Array(9);
+      for (let i = 0; i < 9; i++) evals[i] = A[i * 9 + i];
+      return { evals, V };
+    }
+
+    function matMul9(A, B) {
+      const C = new Float64Array(81);
+      for (let i = 0; i < 9; i++) {
+        for (let k = 0; k < 9; k++) {
+          const aik = A[i * 9 + k];
+          for (let j = 0; j < 9; j++) {
+            C[i * 9 + j] += aik * B[k * 9 + j];
+          }
+        }
+      }
+      return C;
+    }
+
+    function evaluateSelection(selected, gainMode) {
+      // gainMode: "I_A" | "D_opt" | "A_opt"
+      const nCand = META.n_candidates;
+      const F = new Float64Array(81);
+      const isSel = new Uint8Array(nCand);
+
+      for (let idx = 0; idx < selected.length; idx++) {
+        const s = selected[idx];
+        isSel[s] = 1;
+        const base = s * 18;
+        for (let i = 0; i < 9; i++) {
+          const r0i = JW[base + i];
+          const r1i = JW[base + 9 + i];
+          for (let j = i; j < 9; j++) {
+            F[i * 9 + j] += r0i * JW[base + j] + r1i * JW[base + 9 + j];
+          }
+        }
+      }
+      for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < i; j++) F[i * 9 + j] = F[j * 9 + i];
+      }
+
+      const { evals, V } = jacobiEigen9(F);
+      let maxEv = 0.0;
+      for (let i = 0; i < 9; i++) if (evals[i] > maxEv) maxEv = evals[i];
+      const tol = Math.max(maxEv * 1e-12, 1e-12);
+
+      let rank = 0;
+      for (let i = 0; i < 9; i++) if (evals[i] > tol) rank++;
+
+      const gains = new Float64Array(nCand);
+      let mse = null, rmse = null, logdet = null, traceInv = null;
+      let gainUnitLabel = "";
+
+      if (rank < 9) {
+        // Phase I Rank-First Initialization: project onto nullspace of F_S
+        gainUnitLabel = "Nullspace energy tr(L_s P_⊥ L_sᵀ)";
+        const Pnull = new Float64Array(81);
+        if (selected.length === 0) {
+          for (let i = 0; i < 9; i++) Pnull[i * 9 + i] = 1.0;
+        } else {
+          for (let k = 0; k < 9; k++) {
+            if (evals[k] <= tol) {
+              for (let i = 0; i < 9; i++) {
+                const vi = V[i * 9 + k];
+                for (let j = 0; j < 9; j++) {
+                  Pnull[i * 9 + j] += vi * V[j * 9 + k];
+                }
+              }
+            }
+          }
+        }
+        for (let s = 0; s < nCand; s++) {
+          if (isSel[s]) continue;
+          const base = s * 18;
+          let tr0 = 0.0, tr1 = 0.0;
+          for (let i = 0; i < 9; i++) {
+            let p0 = 0.0, p1 = 0.0;
+            const rowP = i * 9;
+            for (let j = 0; j < 9; j++) {
+              const pij = Pnull[rowP + j];
+              p0 += pij * JW[base + j];
+              p1 += pij * JW[base + 9 + j];
+            }
+            tr0 += JW[base + i] * p0;
+            tr1 += JW[base + 9 + i] * p1;
+          }
+          gains[s] = Math.max(0.0, tr0 + tr1);
+        }
+      } else {
+        // Full rank 9: exact inverse M = F_S^-1
+        const M = new Float64Array(81);
+        let ld = 0.0, trM = 0.0;
+        for (let k = 0; k < 9; k++) {
+          const invEv = 1.0 / evals[k];
+          ld += Math.log(evals[k]);
+          trM += invEv;
+          for (let i = 0; i < 9; i++) {
+            const vi = V[i * 9 + k] * invEv;
+            for (let j = 0; j < 9; j++) {
+              M[i * 9 + j] += vi * V[j * 9 + k];
+            }
+          }
+        }
+        logdet = ld;
+        traceInv = trM;
+
+        let phiVal = 0.0;
+        for (let i = 0; i < 81; i++) phiVal += Q_FLAT[i] * M[i];
+        mse = phiVal;
+        rmse = Math.sqrt(Math.max(0.0, phiVal));
+
+        if (gainMode === "D_opt") {
+          gainUnitLabel = "Δ_D = ln det(I₂ + L_s F_S⁻¹ L_sᵀ)";
+          for (let s = 0; s < nCand; s++) {
+            if (isSel[s]) continue;
+            const base = s * 18;
+            let a00 = 1.0, a01 = 0.0, a11 = 1.0;
+            for (let i = 0; i < 9; i++) {
+              let m0 = 0.0, m1 = 0.0;
+              const rowM = i * 9;
+              for (let j = 0; j < 9; j++) {
+                const mij = M[rowM + j];
+                m0 += mij * JW[base + j];
+                m1 += mij * JW[base + 9 + j];
+              }
+              const l0i = JW[base + i], l1i = JW[base + 9 + i];
+              a00 += l0i * m0;
+              a01 += l0i * m1;
+              a11 += l1i * m1;
+            }
+            const det = a00 * a11 - a01 * a01;
+            gains[s] = det > 1.0 ? Math.log(det) : 0.0;
+          }
+        } else {
+          // IA (W = M Q_A M) or A-opt (W = M^2)
+          const W = gainMode === "A_opt" ? matMul9(M, M) : matMul9(matMul9(M, Q_FLAT), M);
+          gainUnitLabel = gainMode === "A_opt"
+            ? "Δ_A = Parameter Variance Reduction"
+            : "Δ_IA (×10⁻³ m² MSE Reduction)";
+          const scale = gainMode === "I_A" ? 1e3 : 1.0;
+
+          for (let s = 0; s < nCand; s++) {
+            if (isSel[s]) continue;
+            const base = s * 18;
+            let a00 = 1.0, a01 = 0.0, a11 = 1.0;
+            let b00 = 0.0, b01 = 0.0, b11 = 0.0;
+            for (let i = 0; i < 9; i++) {
+              let m0 = 0.0, m1 = 0.0, w0 = 0.0, w1 = 0.0;
+              const row = i * 9;
+              for (let j = 0; j < 9; j++) {
+                const j0 = JW[base + j], j1 = JW[base + 9 + j];
+                const mij = M[row + j], wij = W[row + j];
+                m0 += mij * j0; m1 += mij * j1;
+                w0 += wij * j0; w1 += wij * j1;
+              }
+              const l0i = JW[base + i], l1i = JW[base + 9 + i];
+              a00 += l0i * m0; a01 += l0i * m1; a11 += l1i * m1;
+              b00 += l0i * w0; b01 += l0i * w1; b11 += l1i * w1;
+            }
+            const detA = a00 * a11 - a01 * a01;
+            const num = a11 * b00 - 2.0 * a01 * b01 + a00 * b11;
+            gains[s] = detA > 0 ? Math.max(0.0, (num / detA) * scale) : 0.0;
+          }
+        }
+      }
+
+      let maxGain = 0.0, bestCand = 0;
+      for (let s = 0; s < nCand; s++) {
+        if (gains[s] > maxGain) { maxGain = gains[s]; bestCand = s; }
+      }
+
+      // Fill offscreen 1960x8 RGBA image
+      const denom = maxGain > 0 ? maxGain : 1.0;
+      const data = heatImg.data;
+      for (let col = 0; col < 1960; col++) {
+        for (let ly = 0; ly < 8; ly++) {
+          const s = col * 8 + ly;
+          const cIdx = Math.min(255, Math.max(0, Math.round((gains[s] / denom) * 255))) * 3;
+          const pxIdx = (ly * 1960 + col) * 4;
+          data[pxIdx + 0] = CMAP[cIdx + 0];
+          data[pxIdx + 1] = CMAP[cIdx + 1];
+          data[pxIdx + 2] = CMAP[cIdx + 2];
+          data[pxIdx + 3] = 232;
+        }
+      }
+      heatCtx.putImageData(heatImg, 0, 0);
+
+      // Compute Outer (max L0, L7) and Inner (mean L3, L4) profiles
+      const outerCurve = new Float64Array(1960);
+      const innerCurve = new Float64Array(1960);
+      for (let col = 0; col < 1960; col++) {
+        const b = col * 8;
+        outerCurve[col] = Math.max(gains[b + 0], gains[b + 7]);
+        innerCurve[col] = 0.5 * (gains[b + 3] + gains[b + 4]);
+      }
+
+      return {
+        selected, isSel, rank, mse, rmse, logdet, traceInv,
+        gains, maxGain, bestCand, outerCurve, innerCurve, gainUnitLabel, gainMode
+      };
+    }
+
+    // =========================================================================
+    // Active View State Resolution
+    // =========================================================================
+    function getActiveConfig() {
+      if (state.mode === "dynamic") {
+        const traj = META.trajectories[state.dynCrit];
+        const idx = Math.min(Math.max(0, state.stepIdx), traj.length - 1);
+        const st = traj[idx];
+        const gainMode = state.lens === "ia" ? "I_A" : state.dynCrit;
+        return {
+          selected: st.selected,
+          added: st.added,
+          removed: st.removed,
+          phase: st.phase,
+          stepLabel: st.label,
+          gainMode,
+          showNextStar: idx < traj.length - 1 && st.phase !== "exchange"
+        };
+      } else if (state.mode === "explorer") {
+        const key = `${state.expMethod}_N${state.expN}`;
+        const lay = META.layouts[key];
+        return {
+          selected: lay ? lay.selected : [],
+          added: null,
+          removed: null,
+          phase: "converged",
+          stepLabel: `${state.expMethod} (N = ${state.expN})`,
+          gainMode: "I_A",
+          showNextStar: true
+        };
+      } else {
+        return {
+          selected: state.sandboxSel.slice(),
+          added: state.sandboxAdded,
+          removed: state.sandboxRemoved,
+          phase: "sandbox",
+          stepLabel: `Custom Layout (|S| = ${state.sandboxSel.length})`,
+          gainMode: "I_A",
+          showNextStar: true
+        };
+      }
+    }
+
+    function updateModelAndRender() {
+      const cfg = getActiveConfig();
+      const comp = evaluateSelection(cfg.selected, cfg.gainMode);
+      comp.cfg = cfg;
+      state.computed = comp;
+
+      updateKPIsAndInsight(comp);
+      renderAllCanvases();
+    }
+
+    function formatMethodName(m) {
+      return { I_A: "IA (Ours)", D_opt: "D-opt", A_opt: "A-opt", U_A: "U-A", U_phi: "U-φ" }[m] || m;
+    }
+
+    function updateKPIsAndInsight(comp) {
+      const { selected, rank, rmse, logdet, traceInv, bestCand, cfg } = comp;
+      const n = selected.length;
+      document.getElementById("kpi-n").textContent = `${n}`;
+      document.getElementById("kpi-downlink").textContent =
+        `${((n / 15680) * 100).toFixed(3)}% of 15,680 strip windows`;
+
+      const rankEl = document.getElementById("kpi-rank");
+      rankEl.textContent = `${rank} / 9`;
+      rankEl.style.color = rank === 9 ? "#16a34a" : "#d97706";
+      document.getElementById("kpi-rank-sub").textContent =
+        rank === 9 ? "Full 9-parameter observability" : `Rank-deficient (${9 - rank} nullspace DOF remaining)`;
+
+      document.getElementById("kpi-rmse").textContent = rmse !== null ? `${rmse.toFixed(4)} m` : "— (Rank < 9)";
+      document.getElementById("kpi-kappa").textContent = rmse !== null ? `${(rmse / 0.1).toFixed(3)} m/px` : "—";
+      document.getElementById("kpi-logdet").textContent = logdet !== null ? logdet.toFixed(2) : "—";
+      document.getElementById("kpi-trace").textContent = traceInv !== null ? traceInv.toFixed(4) : "—";
+
+      // Allocation statistics across scan-angle bins and outer layers L0/L7
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, outerCnt = 0;
+      for (const s of selected) {
+        const col = Math.floor(s / 8), ly = s % 8;
+        const aphi = Math.abs(META.phi_col_deg[col]);
+        if (aphi < 15) b0++;
+        else if (aphi < 45) b1++;
+        else if (aphi < 60) b2++;
+        else b3++;
+        if (ly === 0 || ly === 7) outerCnt++;
+      }
+
+      const chipsEl = document.getElementById("alloc-chips");
+      if (n > 0) {
+        chipsEl.innerHTML = [
+          `|φ| ≥ 60°: ${b3}/${n} (${Math.round((b3 / n) * 100)}%)`,
+          `15°–45°: ${b1}/${n} (${Math.round((b1 / n) * 100)}%)`,
+          `|φ| < 15°: ${b0}/${n} (${Math.round((b0 / n) * 100)}%)`,
+          `Outer L0/L7: ${outerCnt}/${n} (${Math.round((outerCnt / n) * 100)}%)`
+        ].map(t => `<span class="alloc-chip">${t}</span>`).join("");
+      } else {
+        chipsEl.innerHTML = "";
+      }
+
+      // Dynamic physical insight explanation
+      const nbPhi = META.phi_col_deg[Math.floor(bestCand / 8)];
+      const nbLay = bestCand % 8;
+      const insightEl = document.getElementById("insight-text");
+
+      if (state.mode === "dynamic") {
+        const traj = META.trajectories[state.dynCrit];
+        document.getElementById("step-slider").max = traj.length - 1;
+        document.getElementById("step-slider").value = state.stepIdx;
+        document.getElementById("step-label").textContent = cfg.stepLabel;
+
+        if (cfg.phase === "init") {
+          insightEl.innerHTML = `<strong>Phase I (Rank-First Initialization):</strong> Building full 9-DOF parameter identifiability across cross-swath scan angles and along-track detector rows (current rank = <strong>${rank}/9</strong>).`;
+        } else if (cfg.phase === "forward") {
+          if (state.dynCrit === "A_opt") {
+            insightEl.innerHTML = `<strong> Criterion Mismatch Alert (A-opt):</strong> Unweighted parameter trace Δ_A peaks near <strong>φ = ${nbPhi.toFixed(1)}° (L${nbLay})</strong> because fine nadir GSD yields large pixel-space partials, starving wide-angle edges of control! Toggle <em>Full-Swath Task-Benefit Δ_IA</em> above to see the uncalibrated edge error.`;
+          } else if (state.dynCrit === "D_opt") {
+            insightEl.innerHTML = `<strong>Phase II (D-opt Forward Selection):</strong> Maximizing parameter-ellipsoid volume splits windows evenly between swath extremes (|φ| ≥ 60°) and intermediate ±33° zones, next peaking at <strong>φ = ${nbPhi >= 0 ? "+" : ""}${nbPhi.toFixed(1)}° (L${nbLay})</strong>.`;
+          } else {
+            insightEl.innerHTML = `<strong>Phase II (IA Greedy Forward Selection):</strong> Adding window #${cfg.added} suppresses local task uncertainty and migrates the global marginal-benefit peak to <strong>φ = ${nbPhi >= 0 ? "+" : ""}${nbPhi.toFixed(1)}° (L${nbLay})</strong>, prioritizing wide-angle outer layers (L0/L7) plus ±30° collinearity-breaking anchors.`;
+          }
+        } else {
+          insightEl.innerHTML = `<strong>Phase III (Single-Window Exchange Refinement):</strong> Swapping early rank-initialization interior windows (#${cfg.removed} → #${cfg.added}) sharpens full-swath expected RMSE down to <strong>${rmse.toFixed(4)} m</strong> with 100% outer-layer (L0/L7) placement.`;
+        }
+      } else if (state.mode === "explorer") {
+        const iaRef = META.layouts[`I_A_N${state.expN}`].predicted_rmse_m;
+        const gapPct = rmse && state.expMethod !== "I_A"
+          ? ` (+${(((rmse - iaRef) / iaRef) * 100).toFixed(1)}% higher full-swath RMSE than IA)`
+          : " (lowest full-swath positioning error across all baselines)";
+        insightEl.innerHTML = `<strong>${formatMethodName(state.expMethod)} at Budget N = ${state.expN}:</strong> Expected full-swath RMSE = <strong>${rmse.toFixed(4)} m</strong>${gapPct}. Highest remaining uncalibrated task benefit lies at <strong>φ = ${nbPhi >= 0 ? "+" : ""}${nbPhi.toFixed(1)}° (L${nbLay})</strong>.`;
+      } else {
+        insightEl.innerHTML = `<strong>Interactive Sandbox:</strong> Click anywhere on <em>Panel A</em> or <em>Panel C</em> to toggle individual windows! Next optimal IA candidate is <strong>Window #${bestCand} (φ = ${nbPhi >= 0 ? "+" : ""}${nbPhi.toFixed(1)}°, L${nbLay})</strong>.`;
+      }
+    }
+
+    // =========================================================================
+    // High-DPI Canvas Rendering (4 Synchronized Scientific Views)
+    // =========================================================================
+    function setupHiDPICanvas(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const cssW = Math.max(280, Math.floor(rect.width));
+      const cssH = parseInt(canvas.getAttribute("height"), 10) || 240;
+      if (canvas.width !== Math.round(cssW * dpr) || canvas.height !== Math.round(cssH * dpr)) {
+        canvas.width = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+      }
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, W: cssW, H: cssH };
+    }
+
+    function drawStar(ctx, cx, cy, spikes, outerR, innerR, fill, stroke) {
+      let rot = (Math.PI / 2) * 3;
+      const step = Math.PI / spikes;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - outerR);
+      for (let i = 0; i < spikes; i++) {
+        ctx.lineTo(cx + Math.cos(rot) * outerR, cy + Math.sin(rot) * outerR);
+        rot += step;
+        ctx.lineTo(cx + Math.cos(rot) * innerR, cy + Math.sin(rot) * innerR);
+        rot += step;
+      }
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+    }
+
+    // Panel A: 1960 x 8 Detector Grid
+    function renderPanelA() {
+      const canvas = document.getElementById("canvas-grid");
+      const { ctx, W, H } = setupHiDPICanvas(canvas);
+      const comp = state.computed;
+      if (!comp) return;
+
+      ctx.clearRect(0, 0, W, H);
+      const pad = { l: 44, r: 18, t: 10, b: 28 };
+      const pw = W - pad.l - pad.r;
+      const ph = H - pad.t - pad.b;
+
+      // Blit 1960x8 marginal-gain heatmap
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(heatCanvas, pad.l, pad.t, pw, ph);
+      ctx.restore();
+
+      // Layer horizontal separators & labels
+      ctx.strokeStyle = "rgba(255,255,255,0.45)";
+      ctx.lineWidth = 0.75;
+      ctx.fillStyle = "#475569";
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      for (let ly = 0; ly < 8; ly++) {
+        const y = pad.t + ((ly + 0.5) / 8) * ph;
+        if (ly > 0) {
+          const yLine = pad.t + (ly / 8) * ph;
+          ctx.beginPath(); ctx.moveTo(pad.l, yLine); ctx.lineTo(pad.l + pw, yLine); ctx.stroke();
+        }
+        if (ly === 0 || ly === 3 || ly === 4 || ly === 7) {
+          ctx.fillText(`L${ly}`, pad.l - 7, y);
+        }
+      }
+
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(pad.l, pad.t, pw, ph);
+
+      // Scan-angle ticks along bottom
+      const tickPhis = [60, 45, 30, 15, 0, -15, -30, -45, -60];
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillStyle = "#334155";
+      for (const tp of tickPhis) {
+        let bestCol = 0, bestDiff = 1e9;
+        for (let c = 0; c < 1960; c++) {
+          const d = Math.abs(META.phi_col_deg[c] - tp);
+          if (d < bestDiff) { bestDiff = d; bestCol = c; }
+        }
+        const x = pad.l + ((bestCol + 0.5) / 1960) * pw;
+        ctx.beginPath();
+        ctx.moveTo(x, pad.t + ph);
+        ctx.lineTo(x, pad.t + ph + 4);
+        ctx.strokeStyle = "#64748b";
+        ctx.stroke();
+        ctx.fillText(tp === 0 ? "0° (Nadir)" : `${tp > 0 ? "+" : ""}${tp}°`, x, pad.t + ph + 6);
+      }
+
+      // Draw selected windows
+      for (const s of comp.selected) {
+        const col = Math.floor(s / 8), ly = s % 8;
+        const x = pad.l + ((col + 0.5) / 1960) * pw;
+        const y = pad.t + ((ly + 0.5) / 8) * ph;
+        ctx.beginPath();
+        ctx.arc(x, y, 4.6, 0, Math.PI * 2);
+        ctx.fillStyle = "#0f172a";
+        ctx.fill();
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = "#ffffff";
+        ctx.stroke();
+      }
+
+      // Highlight newly added / swapped window
+      if (comp.cfg.added !== null && comp.cfg.added !== undefined) {
+        const col = Math.floor(comp.cfg.added / 8), ly = comp.cfg.added % 8;
+        const x = pad.l + ((col + 0.5) / 1960) * pw;
+        const y = pad.t + ((ly + 0.5) / 8) * ph;
+        ctx.beginPath();
+        ctx.arc(x, y, 7.2, 0, Math.PI * 2);
+        ctx.fillStyle = "#dc2626";
+        ctx.fill();
+        ctx.lineWidth = 2.0;
+        ctx.strokeStyle = "#fef08a";
+        ctx.stroke();
+      }
+
+      // Next peak star
+      if (comp.cfg.showNextStar && comp.maxGain > 0) {
+        const col = Math.floor(comp.bestCand / 8), ly = comp.bestCand % 8;
+        const x = pad.l + ((col + 0.5) / 1960) * pw;
+        const y = pad.t + ((ly + 0.5) / 8) * ph;
+        drawStar(ctx, x, y, 5, 7.8, 3.6, "#2563eb", "#ffffff");
+      }
+
+      // Hover crosshair
+      if (state.hoverCand !== null) {
+        const col = Math.floor(state.hoverCand / 8), ly = state.hoverCand % 8;
+        const x = pad.l + ((col + 0.5) / 1960) * pw;
+        const y = pad.t + ((ly + 0.5) / 8) * ph;
+        ctx.save();
+        ctx.strokeStyle = "rgba(15, 23, 42, 0.55)";
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + ph); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 1.6; ctx.stroke();
+        ctx.restore();
+      }
+
+      canvas._plotBox = { pad, pw, ph };
+    }
+
+    // Panel B: Scan-Angle Marginal Benefit Profile
+    function renderPanelB() {
+      const canvas = document.getElementById("canvas-profile");
+      const { ctx, W, H } = setupHiDPICanvas(canvas);
+      const comp = state.computed;
+      if (!comp) return;
+
+      ctx.clearRect(0, 0, W, H);
+      const pad = { l: 50, r: 14, t: 14, b: 34 };
+      const pw = W - pad.l - pad.r;
+      const ph = H - pad.t - pad.b;
+
+      const yMax = Math.max(comp.maxGain * 1.22, 1e-6);
+      const phiToX = phi => pad.l + ((65 - phi) / 130) * pw;
+      const valToY = v => pad.t + ph - Math.min(1.0, Math.max(0.0, v / yMax)) * ph;
+
+      // Grid
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#64748b";
+      ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      for (let i = 0; i <= 4; i++) {
+        const v = (yMax * i) / 4;
+        const y = valToY(v);
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+        ctx.textAlign = "right"; ctx.textBaseline = "middle";
+        const lbl = yMax >= 10 ? v.toFixed(0) : (yMax >= 1 ? v.toFixed(2) : v.toExponential(1));
+        ctx.fillText(lbl, pad.l - 6, y);
+      }
+
+      for (const tp of [60, 30, 0, -30, -60]) {
+        const x = phiToX(tp);
+        ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + ph); ctx.stroke();
+        ctx.textAlign = "center"; ctx.textBaseline = "top";
+        ctx.fillText(tp === 0 ? "0°" : `${tp > 0 ? "+" : ""}${tp}°`, x, pad.t + ph + 5);
+      }
+
+      // Shaded area under outer curve
+      ctx.beginPath();
+      ctx.moveTo(phiToX(META.phi_col_deg[0]), valToY(0));
+      for (let c = 0; c < 1960; c++) {
+        ctx.lineTo(phiToX(META.phi_col_deg[c]), valToY(comp.outerCurve[c]));
+      }
+      ctx.lineTo(phiToX(META.phi_col_deg[1959]), valToY(0));
+      ctx.closePath();
+      ctx.fillStyle = "rgba(252, 165, 165, 0.25)";
+      ctx.fill();
+
+      // Inner layers dashed line (L3/L4)
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = "#64748b";
+      ctx.lineWidth = 1.4;
+      for (let c = 0; c < 1960; c++) {
+        const x = phiToX(META.phi_col_deg[c]), y = valToY(comp.innerCurve[c]);
+        if (c === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Outer layers solid line (L0/L7 max)
+      ctx.beginPath();
+      ctx.strokeStyle = "#dc2626";
+      ctx.lineWidth = 1.8;
+      for (let c = 0; c < 1960; c++) {
+        const x = phiToX(META.phi_col_deg[c]), y = valToY(comp.outerCurve[c]);
+        if (c === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Next peak marker
+      if (comp.maxGain > 0) {
+        const bCol = Math.floor(comp.bestCand / 8);
+        const bPhi = META.phi_col_deg[bCol];
+        const bx = phiToX(bPhi), by = valToY(comp.gains[comp.bestCand]);
+        ctx.beginPath(); ctx.arc(bx, by, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#2563eb"; ctx.fill();
+        ctx.fillStyle = "#1d4ed8";
+        ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        ctx.textAlign = bPhi > 42 ? "left" : (bPhi < -42 ? "right" : "center");
+        ctx.textBaseline = "bottom";
+        ctx.fillText(`Peak: ${bPhi >= 0 ? "+" : ""}${bPhi.toFixed(1)}°`, bx + (bPhi > 42 ? 5 : (bPhi < -42 ? -5 : 0)), by - 6);
+      }
+
+      // Legend inside top-center
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      const lx = pad.l + 10, ly = pad.t + 12;
+      ctx.fillStyle = "rgba(255,255,255,0.88)";
+      ctx.fillRect(lx - 4, ly - 9, 155, 34);
+      ctx.strokeStyle = "#dc2626"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 16, ly); ctx.stroke();
+      ctx.fillStyle = "#0f172a"; ctx.fillText("Outer layers (L0 / L7)", lx + 22, ly);
+
+      ctx.save(); ctx.strokeStyle = "#64748b"; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(lx, ly + 15); ctx.lineTo(lx + 16, ly + 15); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = "#475569"; ctx.fillText("Inner layers (L3 / L4)", lx + 22, ly + 15);
+
+      ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 1;
+      ctx.strokeRect(pad.l, pad.t, pw, ph);
+
+      // Axis titles
+      ctx.fillStyle = "#334155";
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Scan angle φ (°) — Metric: " + comp.gainUnitLabel, pad.l + pw / 2, H - 10);
+
+      if (state.hoverCand !== null) {
+        const hCol = Math.floor(state.hoverCand / 8);
+        const hx = phiToX(META.phi_col_deg[hCol]);
+        ctx.save();
+        ctx.strokeStyle = "rgba(15,23,42,0.5)";
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(hx, pad.t); ctx.lineTo(hx, pad.t + ph); ctx.stroke();
+        ctx.restore();
+      }
+
+      canvas._plotBox = { pad, pw, ph };
+    }
+
+    // Panel C: Curved Ground-Track Swath Footprint
+    function renderPanelC() {
+      const canvas = document.getElementById("canvas-ground");
+      const { ctx, W, H } = setupHiDPICanvas(canvas);
+      const comp = state.computed;
+      if (!comp) return;
+
+      ctx.clearRect(0, 0, W, H);
+      const pad = { l: 46, r: 14, t: 14, b: 34 };
+      const pw = W - pad.l - pad.r;
+      const ph = H - pad.t - pad.b;
+
+      const xToPx = xKm => pad.l + ((COL_BOUNDS.crossMax - xKm) / (COL_BOUNDS.crossMax - COL_BOUNDS.crossMin)) * pw;
+      const yToPx = yKm => pad.t + ((COL_BOUNDS.alongMax - yKm) / (COL_BOUNDS.alongMax - COL_BOUNDS.alongMin)) * ph;
+
+      // Background grid
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#64748b";
+      ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      for (const xt of [1000, 500, 0, -500, -1000]) {
+        const px = xToPx(xt);
+        ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + ph); ctx.stroke();
+        ctx.textAlign = "center"; ctx.textBaseline = "top";
+        ctx.fillText(`${xt}`, px, pad.t + ph + 5);
+      }
+      for (const yt of [80, 40, 0, -40, -80]) {
+        const py = yToPx(yt);
+        ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + pw, py); ctx.stroke();
+        ctx.textAlign = "right"; ctx.textBaseline = "middle";
+        ctx.fillText(`${yt}`, pad.l - 6, py);
+      }
+
+      // Draw curved swath polygon coloured along cross-track by outer marginal benefit
+      const stepC = 8;
+      for (let c = 0; c < 1960 - stepC; c += stepC) {
+        const s0_top = c * 8 + 0, s0_bot = c * 8 + 7;
+        const s1_top = (c + stepC) * 8 + 0, s1_bot = (c + stepC) * 8 + 7;
+        const norm = comp.maxGain > 0 ? comp.outerCurve[c] / comp.maxGain : 0;
+        const ci = Math.min(255, Math.max(0, Math.round(norm * 255))) * 3;
+
+        ctx.beginPath();
+        ctx.moveTo(xToPx(COORDS[s0_top * 2]), yToPx(COORDS[s0_top * 2 + 1]));
+        ctx.lineTo(xToPx(COORDS[s1_top * 2]), yToPx(COORDS[s1_top * 2 + 1]));
+        ctx.lineTo(xToPx(COORDS[s1_bot * 2]), yToPx(COORDS[s1_bot * 2 + 1]));
+        ctx.lineTo(xToPx(COORDS[s0_bot * 2]), yToPx(COORDS[s0_bot * 2 + 1]));
+        ctx.closePath();
+        ctx.fillStyle = `rgba(${CMAP[ci]}, ${CMAP[ci + 1]}, ${CMAP[ci + 2]}, 0.85)`;
+        ctx.fill();
+      }
+
+      // Swath outline
+      ctx.beginPath();
+      for (let c = 0; c < 1960; c += 8) {
+        const s = c * 8;
+        const px = xToPx(COORDS[s * 2]), py = yToPx(COORDS[s * 2 + 1]);
+        if (c === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      for (let c = 1959; c >= 0; c -= 8) {
+        const s = c * 8 + 7;
+        ctx.lineTo(xToPx(COORDS[s * 2]), yToPx(COORDS[s * 2 + 1]));
+      }
+      ctx.closePath();
+      ctx.strokeStyle = "#64748b";
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+
+      // Selected footprints
+      for (const s of comp.selected) {
+        const px = xToPx(COORDS[s * 2]), py = yToPx(COORDS[s * 2 + 1]);
+        ctx.beginPath(); ctx.arc(px, py, 4.3, 0, Math.PI * 2);
+        ctx.fillStyle = "#0f172a"; ctx.fill();
+        ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.2; ctx.stroke();
+      }
+
+      if (comp.cfg.added !== null && comp.cfg.added !== undefined) {
+        const s = comp.cfg.added;
+        const px = xToPx(COORDS[s * 2]), py = yToPx(COORDS[s * 2 + 1]);
+        ctx.beginPath(); ctx.arc(px, py, 6.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#dc2626"; ctx.fill();
+        ctx.strokeStyle = "#fef08a"; ctx.lineWidth = 1.8; ctx.stroke();
+      }
+
+      if (comp.cfg.showNextStar && comp.maxGain > 0) {
+        const s = comp.bestCand;
+        drawStar(ctx, xToPx(COORDS[s * 2]), yToPx(COORDS[s * 2 + 1]), 5, 7.2, 3.3, "#2563eb", "#ffffff");
+      }
+
+      if (state.hoverCand !== null) {
+        const s = state.hoverCand;
+        ctx.beginPath();
+        ctx.arc(xToPx(COORDS[s * 2]), yToPx(COORDS[s * 2 + 1]), 6.0, 0, Math.PI * 2);
+        ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 1.6; ctx.stroke();
+      }
+
+      ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 1;
+      ctx.strokeRect(pad.l, pad.t, pw, ph);
+
+      ctx.fillStyle = "#334155";
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Cross-track ground distance (km) × Along-track (km)", pad.l + pw / 2, H - 10);
+
+      canvas._plotBox = { pad, pw, ph, xToPx, yToPx };
+    }
+
+    // Panel D: Trajectory Decay (Dynamic/Sandbox) OR Multi-Budget Benchmark (Explorer)
+    function renderPanelD() {
+      const canvas = document.getElementById("canvas-chart");
+      const { ctx, W, H } = setupHiDPICanvas(canvas);
+      const comp = state.computed;
+      if (!comp) return;
+
+      ctx.clearRect(0, 0, W, H);
+      const pad = { l: 46, r: 16, t: 14, b: 34 };
+      const pw = W - pad.l - pad.r;
+      const ph = H - pad.t - pad.b;
+
+      const titleEl = document.getElementById("panel-d-title");
+
+      if (state.mode === "explorer") {
+        // Multi-budget 5-method comparison curves (N = 8..48)
+        const budgets = [8, 16, 24, 32, 40, 48];
+        const methods = [
+          { key: "U_phi", label: "U-φ", col: "#2563eb" },
+          { key: "U_A",   label: "U-A", col: "#0284c7" },
+          { key: "A_opt", label: "A-opt", col: "#d97706" },
+          { key: "D_opt", label: "D-opt", col: "#16a34a" },
+          { key: "I_A",   label: "IA (Ours)", col: "#dc2626" }
+        ];
+
+        const titleMap = {
+          pred: "Panel D — Analytical Expected RMSE √Φ(S) vs. Budget N",
+          mc: "Panel D — Ideal Monte Carlo RMSE (n=400) vs. Budget N",
+          in_strip: "Panel D — Rendered Image In-Strip RMSE vs. Budget N",
+          cross_strip: "Panel D — Rendered Image Cross-Strip RMSE vs. Budget N"
+        };
+        titleEl.textContent = titleMap[state.benchType];
+
+        const getSeries = mKey => {
+          if (state.benchType === "pred") {
+            return budgets.map(n => META.layouts[`${mKey}_N${n}`].predicted_rmse_m);
+          } else if (state.benchType === "mc") {
+            return META.mc_benchmark[mKey].mean;
+          } else {
+            return META.rendered_benchmark[state.benchType][mKey];
+          }
+        };
+
+        let yMax = 0.65;
+        for (const m of methods) {
+          for (const v of getSeries(m.key)) if (v > yMax) yMax = v;
+        }
+        yMax = Math.min(1.25, yMax * 1.08);
+        const yMin = 0.08;
+
+        const nToX = n => pad.l + ((n - 8) / 40) * pw;
+        const vToY = v => pad.t + ph - Math.min(1, Math.max(0, (v - yMin) / (yMax - yMin))) * ph;
+
+        ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
+        ctx.fillStyle = "#64748b";
+        ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        for (let i = 0; i <= 4; i++) {
+          const v = yMin + ((yMax - yMin) * i) / 4;
+          const y = vToY(v);
+          ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+          ctx.textAlign = "right"; ctx.textBaseline = "middle";
+          ctx.fillText(v.toFixed(2), pad.l - 6, y);
+        }
+        for (const n of budgets) {
+          const x = nToX(n);
+          ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + ph); ctx.stroke();
+          ctx.textAlign = "center"; ctx.textBaseline = "top";
+          ctx.fillText(`${n}`, x, pad.t + ph + 5);
+        }
+
+        // Highlight selected budget column
+        const selX = nToX(state.expN);
+        ctx.save();
+        ctx.strokeStyle = "#94a3b8"; ctx.setLineDash([4, 3]);
+        ctx.beginPath(); ctx.moveTo(selX, pad.t); ctx.lineTo(selX, pad.t + ph); ctx.stroke();
+        ctx.restore();
+
+        for (const m of methods) {
+          const ys = getSeries(m.key);
+          const isActive = m.key === state.expMethod;
+          ctx.beginPath();
+          ctx.strokeStyle = m.col;
+          ctx.lineWidth = isActive ? 2.6 : 1.5;
+          ctx.globalAlpha = isActive || m.key === "I_A" ? 1.0 : 0.72;
+          budgets.forEach((n, idx) => {
+            const x = nToX(n), y = vToY(ys[idx]);
+            if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+
+          budgets.forEach((n, idx) => {
+            const x = nToX(n), y = vToY(ys[idx]);
+            ctx.beginPath();
+            ctx.arc(x, y, isActive && n === state.expN ? 5.5 : 3.0, 0, Math.PI * 2);
+            ctx.fillStyle = m.col;
+            ctx.fill();
+            if (isActive && n === state.expN) {
+              ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.5; ctx.stroke();
+            }
+          });
+          ctx.globalAlpha = 1.0;
+        }
+
+        // Compact legend
+        let lx = pad.l + pw - 78, ly = pad.t + 10;
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.fillRect(lx - 6, ly - 6, 78, 76);
+        methods.slice().reverse().forEach((m, i) => {
+          const y = ly + i * 14;
+          ctx.fillStyle = m.col;
+          ctx.fillRect(lx, y - 3, 12, 3);
+          ctx.fillStyle = "#1e293b";
+          ctx.font = m.key === "I_A" ? "bold 10.5px sans-serif" : "10.5px sans-serif";
+          ctx.textAlign = "left"; ctx.textBaseline = "middle";
+          ctx.fillText(m.label, lx + 16, y);
+        });
+
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 1;
+        ctx.strokeRect(pad.l, pad.t, pw, ph);
+        ctx.fillStyle = "#334155"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText("Downlinked window budget N — Full-swath RMSE (m)", pad.l + pw / 2, H - 10);
+      } else {
+        // Dynamic trajectory decay curve
+        titleEl.textContent = "Panel D — Expected Full-Swath RMSE √Φ(S_t) Convergence";
+        const traj = META.trajectories[state.mode === "dynamic" ? state.dynCrit : "I_A"];
+        const startIdx = 4; // Step 5 = full rank
+        const totalPts = traj.length - startIdx;
+
+        const yMin = 0.16, yMax = 1.00;
+        const idxToX = k => pad.l + ((k - startIdx) / Math.max(1, totalPts - 1)) * pw;
+        const vToY = v => pad.t + ph - Math.min(1, Math.max(0, (v - yMin) / (yMax - yMin))) * ph;
+
+        ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
+        ctx.fillStyle = "#64748b";
+        ctx.font = "10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        for (const v of [0.2, 0.4, 0.6, 0.8, 1.0]) {
+          const y = vToY(v);
+          ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+          ctx.textAlign = "right"; ctx.textBaseline = "middle";
+          ctx.fillText(v.toFixed(1), pad.l - 6, y);
+        }
+
+        // Reference N=24 baseline lines
+        const refs = [
+          { lbl: "U-φ (N=24): 0.570 m", v: META.layouts.U_phi_N24.predicted_rmse_m, col: "#2563eb" },
+          { lbl: "A-opt (N=24): 0.370 m", v: META.layouts.A_opt_N24.predicted_rmse_m, col: "#d97706" },
+          { lbl: "U-A (N=24): 0.290 m", v: META.layouts.U_A_N24.predicted_rmse_m, col: "#0284c7" },
+          { lbl: "D-opt (N=24): 0.243 m", v: META.layouts.D_opt_N24.predicted_rmse_m, col: "#16a34a" }
+        ];
+        for (const r of refs) {
+          const y = vToY(r.v);
+          ctx.save();
+          ctx.strokeStyle = r.col; ctx.setLineDash([2, 3]); ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+          ctx.restore();
+          ctx.fillStyle = r.col;
+          ctx.font = "bold 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+          ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+          ctx.fillText(r.lbl, pad.l + pw - 4, y - 2);
+        }
+
+        // Forward-selection end divider (index 23)
+        if (traj.length > 24) {
+          const x24 = idxToX(23);
+          ctx.save();
+          ctx.strokeStyle = "#94a3b8"; ctx.setLineDash([4, 3]);
+          ctx.beginPath(); ctx.moveTo(x24, pad.t); ctx.lineTo(x24, pad.t + ph); ctx.stroke();
+          ctx.restore();
+          ctx.fillStyle = "#64748b"; ctx.font = "10px sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "top";
+          ctx.fillText("N=24 Forward", x24 - 4, pad.t + 4);
+        }
+
+        // Full grey trajectory
+        ctx.beginPath();
+        ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 1.8;
+        for (let k = startIdx; k < traj.length; k++) {
+          const v = traj[k].ia_rmse;
+          if (v === null) continue;
+          const x = idxToX(k), y = vToY(v);
+          if (k === startIdx) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        if (state.mode === "dynamic" && state.stepIdx >= startIdx) {
+          const endK = Math.min(state.stepIdx, traj.length - 1);
+          ctx.beginPath();
+          ctx.strokeStyle = "#dc2626"; ctx.lineWidth = 2.4;
+          for (let k = startIdx; k <= endK; k++) {
+            const v = traj[k].ia_rmse;
+            if (v === null) continue;
+            const x = idxToX(k), y = vToY(v);
+            if (k === startIdx) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+
+          const curV = traj[endK].ia_rmse;
+          if (curV !== null) {
+            ctx.beginPath();
+            ctx.arc(idxToX(endK), vToY(curV), 5.0, 0, Math.PI * 2);
+            ctx.fillStyle = "#dc2626"; ctx.fill();
+            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.4; ctx.stroke();
+          }
+        } else if (state.mode === "sandbox" && comp.rmse !== null) {
+          const y = vToY(comp.rmse);
+          ctx.strokeStyle = "#dc2626"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+          ctx.fillStyle = "#dc2626"; ctx.font = "bold 10.5px sans-serif";
+          ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+          ctx.fillText(`Sandbox √Φ(S) = ${comp.rmse.toFixed(4)} m`, pad.l + 6, y - 3);
+        }
+
+        ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 1;
+        ctx.strokeRect(pad.l, pad.t, pw, ph);
+        ctx.fillStyle = "#334155"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText("Optimization progression (Steps 5..24 + Exchange) — √Φ(S) (m)", pad.l + pw / 2, H - 10);
+      }
+    }
+
+    function renderAllCanvases() {
+      renderPanelA();
+      renderPanelB();
+      renderPanelC();
+      renderPanelD();
+    }
+
+    // =========================================================================
+    // Hover Inspection & Sandbox Click-to-Toggle Interaction
+    // =========================================================================
+    function updateHoverReadout(s) {
+      const el = document.getElementById("hover-readout");
+      if (s === null || !state.computed) {
+        el.textContent = "Hover over any panel to inspect candidate window geometry, local GSD, and marginal gain Δ(s | S).";
+        return;
+      }
+      const col = Math.floor(s / 8), ly = s % 8;
+      const phi = META.phi_col_deg[col];
+      const gC = META.gsd_cross_col_m[col], gA = META.gsd_along_col_m[col];
+      const xKm = COORDS[s * 2], yKm = COORDS[s * 2 + 1];
+      const gain = state.computed.gains[s];
+      const selTag = state.computed.isSel[s] ? " [SELECTED]" : "";
+      el.textContent =
+        `Window #${s}${selTag} | (col=${col}, L${ly}) | φ=${phi >= 0 ? "+" : ""}${phi.toFixed(2)}° | ` +
+        `GSD=${gC.toFixed(2)}×${gA.toFixed(2)} m | Ground=(${xKm.toFixed(1)}, ${yKm.toFixed(1)}) km | Δ=${gain.toExponential(3)}`;
+    }
+
+    function toggleSandboxCandidate(s) {
+      if (state.mode !== "sandbox" || s === null) return;
+      const idx = state.sandboxSel.indexOf(s);
+      if (idx >= 0) {
+        state.sandboxSel.splice(idx, 1);
+        state.sandboxAdded = null;
+        state.sandboxRemoved = s;
+      } else {
+        state.sandboxSel.push(s);
+        state.sandboxAdded = s;
+        state.sandboxRemoved = null;
+      }
+      updateModelAndRender();
+    }
+
+    function bindCanvasPointerEvents() {
+      const cGrid = document.getElementById("canvas-grid");
+      cGrid.addEventListener("mousemove", ev => {
+        const box = cGrid._plotBox;
+        if (!box) return;
+        const rect = cGrid.getBoundingClientRect();
+        const x = ev.clientX - rect.left, y = ev.clientY - rect.top;
+        if (x < box.pad.l || x > box.pad.l + box.pw || y < box.pad.t || y > box.pad.t + box.ph) {
+          if (state.hoverCand !== null) { state.hoverCand = null; updateHoverReadout(null); renderAllCanvases(); }
+          return;
+        }
+        const col = Math.min(1959, Math.max(0, Math.floor(((x - box.pad.l) / box.pw) * 1960)));
+        const ly = Math.min(7, Math.max(0, Math.floor(((y - box.pad.t) / box.ph) * 8)));
+        const s = col * 8 + ly;
+        if (state.hoverCand !== s) {
+          state.hoverCand = s;
+          updateHoverReadout(s);
+          renderAllCanvases();
+        }
+      });
+      cGrid.addEventListener("mouseleave", () => {
+        if (state.hoverCand !== null) { state.hoverCand = null; updateHoverReadout(null); renderAllCanvases(); }
+      });
+      cGrid.addEventListener("click", () => {
+        if (state.hoverCand !== null) toggleSandboxCandidate(state.hoverCand);
+      });
+
+      const cProf = document.getElementById("canvas-profile");
+      cProf.addEventListener("mousemove", ev => {
+        const box = cProf._plotBox;
+        if (!box) return;
+        const rect = cProf.getBoundingClientRect();
+        const x = ev.clientX - rect.left;
+        if (x < box.pad.l || x > box.pad.l + box.pw) return;
+        const phi = 65 - ((x - box.pad.l) / box.pw) * 130;
+        let bestCol = 0, bestDiff = 1e9;
+        for (let c = 0; c < 1960; c++) {
+          const d = Math.abs(META.phi_col_deg[c] - phi);
+          if (d < bestDiff) { bestDiff = d; bestCol = c; }
+        }
+        const ly = state.computed && state.computed.gains[bestCol * 8 + 7] > state.computed.gains[bestCol * 8] ? 7 : 0;
+        const s = bestCol * 8 + ly;
+        if (state.hoverCand !== s) {
+          state.hoverCand = s;
+          updateHoverReadout(s);
+          renderAllCanvases();
+        }
+      });
+      cProf.addEventListener("mouseleave", () => {
+        if (state.hoverCand !== null) { state.hoverCand = null; updateHoverReadout(null); renderAllCanvases(); }
+      });
+
+      const cGnd = document.getElementById("canvas-ground");
+      cGnd.addEventListener("mousemove", ev => {
+        const box = cGnd._plotBox;
+        if (!box) return;
+        const rect = cGnd.getBoundingClientRect();
+        const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+        if (mx < box.pad.l || mx > box.pad.l + box.pw || my < box.pad.t || my > box.pad.t + box.ph) return;
+        let bestS = null, bestD2 = 18 * 18;
+        for (let s = 0; s < 15680; s += 3) {
+          const dx = box.xToPx(COORDS[s * 2]) - mx;
+          const dy = box.yToPx(COORDS[s * 2 + 1]) - my;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < bestD2) { bestD2 = d2; bestS = s; }
+        }
+        if (state.hoverCand !== bestS) {
+          state.hoverCand = bestS;
+          updateHoverReadout(bestS);
+          renderAllCanvases();
+        }
+      });
+      cGnd.addEventListener("mouseleave", () => {
+        if (state.hoverCand !== null) { state.hoverCand = null; updateHoverReadout(null); renderAllCanvases(); }
+      });
+      cGnd.addEventListener("click", () => {
+        if (state.hoverCand !== null) toggleSandboxCandidate(state.hoverCand);
+      });
+    }
+
+    // =========================================================================
+    // Playback & Control Bindings
+    // =========================================================================
+    function stopPlayback() {
+      state.playing = false;
+      if (state.playTimer) { clearInterval(state.playTimer); state.playTimer = null; }
+      document.getElementById("btn-play").innerHTML = "&#9654; Play";
+    }
+
+    function startPlayback() {
+      stopPlayback();
+      const traj = META.trajectories[state.dynCrit];
+      if (state.stepIdx >= traj.length - 1) state.stepIdx = 4;
+      state.playing = true;
+      document.getElementById("btn-play").innerHTML = "&#9208; Pause";
+      state.playTimer = setInterval(() => {
+        const t = META.trajectories[state.dynCrit];
+        if (state.stepIdx < t.length - 1) {
+          state.stepIdx++;
+          updateModelAndRender();
+        } else {
+          stopPlayback();
+        }
+      }, state.speedMs);
+    }
+
+    function bindUIControls() {
+      // Mode Tabs
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          stopPlayback();
+          document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.mode = btn.dataset.mode;
+
+          document.getElementById("deck-dynamic").classList.toggle("hidden", state.mode !== "dynamic");
+          document.getElementById("deck-explorer").classList.toggle("hidden", state.mode !== "explorer");
+          document.getElementById("deck-sandbox").classList.toggle("hidden", state.mode !== "sandbox");
+
+          if (state.mode === "sandbox" && state.sandboxSel.length === 0) {
+            state.sandboxSel = META.trajectories.I_A[4].selected.slice();
+          }
+          updateModelAndRender();
+        });
+      });
+
+      // Dynamic Criterion
+      document.querySelectorAll("[data-dyn-crit]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          stopPlayback();
+          document.querySelectorAll("[data-dyn-crit]").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.dynCrit = btn.dataset.dynCrit;
+          const maxLen = META.trajectories[state.dynCrit].length - 1;
+          if (state.stepIdx > maxLen) state.stepIdx = maxLen;
+          updateModelAndRender();
+        });
+      });
+
+      // Lens Toggle
+      document.querySelectorAll("[data-lens]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-lens]").forEach(b => b.classList.remove("active-blue"));
+          btn.classList.add("active-blue");
+          state.lens = btn.dataset.lens;
+          updateModelAndRender();
+        });
+      });
+
+      // Transport Controls
+      document.getElementById("btn-play").addEventListener("click", () => {
+        if (state.playing) stopPlayback(); else startPlayback();
+      });
+      document.getElementById("btn-reset").addEventListener("click", () => {
+        stopPlayback(); state.stepIdx = 0; updateModelAndRender();
+      });
+      document.getElementById("btn-prev").addEventListener("click", () => {
+        stopPlayback(); state.stepIdx = Math.max(0, state.stepIdx - 1); updateModelAndRender();
+      });
+      document.getElementById("btn-next").addEventListener("click", () => {
+        stopPlayback();
+        const maxLen = META.trajectories[state.dynCrit].length - 1;
+        state.stepIdx = Math.min(maxLen, state.stepIdx + 1);
+        updateModelAndRender();
+      });
+      document.getElementById("btn-end").addEventListener("click", () => {
+        stopPlayback();
+        state.stepIdx = META.trajectories[state.dynCrit].length - 1;
+        updateModelAndRender();
+      });
+      document.getElementById("step-slider").addEventListener("input", ev => {
+        stopPlayback();
+        state.stepIdx = parseInt(ev.target.value, 10);
+        updateModelAndRender();
+      });
+
+      document.querySelectorAll("[data-speed]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-speed]").forEach(b => b.classList.remove("active-blue"));
+          btn.classList.add("active-blue");
+          state.speedMs = parseInt(btn.dataset.speed, 10);
+          if (state.playing) startPlayback();
+        });
+      });
+
+      // Explorer Controls
+      document.querySelectorAll("[data-exp-method]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-exp-method]").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.expMethod = btn.dataset.expMethod;
+          updateModelAndRender();
+        });
+      });
+      document.querySelectorAll("[data-exp-n]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-exp-n]").forEach(b => b.classList.remove("active-blue"));
+          btn.classList.add("active-blue");
+          state.expN = parseInt(btn.dataset.expN, 10);
+          updateModelAndRender();
+        });
+      });
+      document.querySelectorAll("[data-bench]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-bench]").forEach(b => b.classList.remove("active-blue"));
+          btn.classList.add("active-blue");
+          state.benchType = btn.dataset.bench;
+          renderPanelD();
+        });
+      });
+
+      // Sandbox Controls
+      document.getElementById("btn-sb-greedy").addEventListener("click", () => {
+        if (!state.computed) return;
+        const nextS = state.computed.bestCand;
+        if (!state.sandboxSel.includes(nextS)) {
+          state.sandboxSel.push(nextS);
+          state.sandboxAdded = nextS;
+          state.sandboxRemoved = null;
+          updateModelAndRender();
+        }
+      });
+
+      document.getElementById("btn-sb-swap").addEventListener("click", () => {
+        if (state.sandboxSel.length < 6) return;
+        const curComp = evaluateSelection(state.sandboxSel, "I_A");
+        if (curComp.rmse === null) return;
+        let bestMse = curComp.mse;
+        let bestRem = null, bestAdd = null;
+        for (let i = 0; i < state.sandboxSel.length; i++) {
+          const candRem = state.sandboxSel[i];
+          const reduced = state.sandboxSel.filter(x => x !== candRem);
+          const subComp = evaluateSelection(reduced, "I_A");
+          if (subComp.rmse === null) continue;
+          const newMse = subComp.mse - subComp.maxGain * 1e-3;
+          if (newMse < bestMse - 1e-7) {
+            bestMse = newMse;
+            bestRem = candRem;
+            bestAdd = subComp.bestCand;
+          }
+        }
+        if (bestRem !== null && bestAdd !== null) {
+          state.sandboxSel = state.sandboxSel.filter(x => x !== bestRem);
+          state.sandboxSel.push(bestAdd);
+          state.sandboxAdded = bestAdd;
+          state.sandboxRemoved = bestRem;
+          updateModelAndRender();
+        }
+      });
+
+      document.getElementById("btn-sb-clear").addEventListener("click", () => {
+        state.sandboxSel = [];
+        state.sandboxAdded = null;
+        state.sandboxRemoved = null;
+        updateModelAndRender();
+      });
+
+      document.querySelectorAll("[data-sb-preset]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const lay = META.layouts[btn.dataset.sbPreset];
+          if (lay) {
+            state.sandboxSel = lay.selected.slice();
+            state.sandboxAdded = null;
+            state.sandboxRemoved = null;
+            updateModelAndRender();
+          }
+        });
+      });
+
+      window.addEventListener("resize", () => renderAllCanvases());
+    }
+
+    // =========================================================================
+    // Bootstrap
+    // =========================================================================
+    async function init() {
+      try {
+        const [metaRes, jwRes, coordRes] = await Promise.all([
+          fetch("./demo_meta.json"),
+          fetch("./strip1_jw.bin"),
+          fetch("./strip1_coords.bin")
+        ]);
+        META = await metaRes.json();
+        JW = new Float32Array(await jwRes.arrayBuffer());
+        COORDS = new Float32Array(await coordRes.arrayBuffer());
+
+        Q_FLAT = new Float64Array(81);
+        for (let i = 0; i < 9; i++) {
+          for (let j = 0; j < 9; j++) Q_FLAT[i * 9 + j] = META.Q_A[i][j];
+        }
+
+        let cMin = 1e9, cMax = -1e9, aMin = 1e9, aMax = -1e9;
+        for (let s = 0; s < META.n_candidates; s++) {
+          const cx = COORDS[s * 2], ay = COORDS[s * 2 + 1];
+          if (cx < cMin) cMin = cx; if (cx > cMax) cMax = cx;
+          if (ay < aMin) aMin = ay; if (ay > aMax) aMax = ay;
+        }
+        COL_BOUNDS = {
+          crossMin: cMin - 45, crossMax: cMax + 45,
+          alongMin: aMin - 14, alongMax: aMax + 14
+        };
+
+        bindUIControls();
+        bindCanvasPointerEvents();
+        document.getElementById("loading-overlay").classList.add("hidden");
+        updateModelAndRender();
+      } catch (err) {
+        console.error(err);
+        document.getElementById("loading-overlay").innerHTML =
+          `<div style="color:#dc2626;font-weight:700;padding:20px;">Failed to load demo assets: ${err.message}</div>`;
+      }
+    }
+
+    init();
+  })();
+  </script>
+</body>
+</html>

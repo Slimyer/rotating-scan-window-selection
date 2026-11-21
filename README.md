@@ -5,6 +5,12 @@
 <sup>2</sup> China Academy of Aerospace System and Innovation, Beijing 100080, China  
 <sup>*</sup> Corresponding author: `weicheng@hit.edu.cn`
 
+<p align="left">
+  <a href="https://slimyer.github.io/rotating-scan-window-selection/">
+    <img src="https://img.shields.io/badge/Interactive_Web_Demo-Live_on_GitHub_Pages-dc2626?style=for-the-badge" alt="Interactive Web Demo"/>
+  </a>
+</p>
+
 ---
 
 ## Overview
@@ -24,10 +30,30 @@ This repository accompanies our manuscript **"Pre-Imaging Control-Window Selecti
 
 ---
 
+## Interactive Dynamic Window-Selection Demonstration
+
+👉 **Launch Interactive App:** **[https://slimyer.github.io/rotating-scan-window-selection/](https://slimyer.github.io/rotating-scan-window-selection/)**
+
+<p align="center">
+  <a href="https://slimyer.github.io/rotating-scan-window-selection/">
+    <img src="assets/ia_dynamic_selection_demo.gif" width="96%" alt="Dynamic marginal task-benefit evolution and IA window selection"/>
+  </a>
+</p>
+
+The self-contained browser application runs **exact real-time rank-2 matrix updates** across all $1960 \times 8 = 15{,}680$ anonymized candidate detector windows of a nominal $128^\circ$ rotating-scan strip:
+
+1. **Dynamic Step-by-Step Selection:** Step through Phase I (*Rank-First Initialization*), Phase II (*Greedy Forward Selection*), and Phase III (*Single-Window Exchange Refinement*), comparing how the marginal gain landscape $\Delta(s \mid \mathcal{S}_t)$ evolves and migrates across scan angle $\phi$ and detector layers (`L0`–`L7`) under **IA (Ours)**, **D-opt**, and **A-opt**.
+2. **Method & Budget Explorer ($N = 8 \dots 48$):** Compare spatial window allocations, outer-layer (`L0/L7`) concentration, remaining uncalibrated task uncertainty, and full-swath positioning RMSE across **IA**, **D-opt**, **A-opt**, **U-A**, and **U-$\phi$** under analytical, Monte Carlo ($n = 400$), and rendered-image benchmarks.
+3. **Interactive Sandbox (Click to Design):** Click directly on the $1960 \times 8$ detector grid or curved orbital ground swath to add/remove individual control windows, trigger greedy steps or single-window exchange swaps, and inspect real-time normal-matrix rank, scale-free layout factor $\kappa(\mathcal{S})$, and $\sqrt{\Phi(\mathcal{S})}$.
+
+> **Data Anonymization Note:** Only normalized pre-imaging sensitivity Jacobians, scan angles, local GSDs, and relative cross-track/along-track swath offsets (km) are included in [`docs/`](docs/). No raw satellite telemetry, geographic coordinates, or reference orthophoto imagery are distributed.
+
+---
+
 ## Release Roadmap
 
 - [x] Project overview and methodological summary
-- [ ] Interactive web demonstration (GitHub Pages) of step-by-step marginal task-benefit $\Delta(s \mid \mathcal{S}_t)$ evolution and dynamic window selection across budgets $N$ *(in preparation)*
+- [x] Interactive web demonstration ([GitHub Pages](https://slimyer.github.io/rotating-scan-window-selection/)) of step-by-step marginal task-benefit $\Delta(s \mid \mathcal{S}_t)$ evolution and dynamic window selection across budgets $N$
 - [ ] Reference Python implementation of the IA forward-selection + multi-start single-window exchange solver and anonymized nominal-geometry benchmark *(to be released upon publication)*
 
 ---
